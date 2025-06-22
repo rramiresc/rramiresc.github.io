@@ -5,6 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avaliação de Formação - PEC Multiplica</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos adicionais para centralizar e melhorar a legibilidade, se necessário */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh; /* Garante que o body ocupe a altura mínima da viewport */
+            background-color: #f4f4f4; /* Cor de fundo padrão, será alterada pelo JS */
+            color: #333; /* Cor do texto padrão, será alterada pelo JS */
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura */
+        }
+        h1, h2 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 20px;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Permite que os itens quebrem a linha em telas menores */
+            gap: 10px; /* Espaço entre os itens */
+        }
+        .timer-display, .response-count {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+        }
+        .section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background-color: #f9f9f9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #444;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group textarea {
+            width: calc(100% - 20px); /* Ajusta largura considerando o padding */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Inclui padding e border na largura total */
+            font-size: 1em;
+        }
+        .form-group input[type="text"][readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .rating-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .rating-group p {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+        .rating-options {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px; /* Espaço entre as opções de rádio */
+        }
+        .rating-options label {
+            background-color: #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: normal; /* Sobrescreve o negrito do label pai */
+            color: #333;
+            display: flex; /* Para alinhar o input e o número */
+            align-items: center;
+            gap: 5px;
+        }
+        .rating-options input[type="radio"] {
+            margin-right: 5px;
+        }
+        .rating-options label:hover {
+            background-color: #d0d0d0;
+        }
+        .rating-options input[type="radio"]:checked + span { /* Span para o número, se estiver usando */
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .rating-options input[type="radio"]:checked + * { /* Se o label envolve tudo, o estilo vai aqui */
+             background-color: #007bff;
+             color: white;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #exportCsvButton {
+            background-color: #28a745; /* Cor diferente para o botão de exportar */
+        }
+        #exportCsvButton:hover {
+            background-color: #218838;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #ccc;
+            margin: 30px 0;
+        }
+        .export-section {
+            text-align: center;
+        }
+        .response-count {
+            margin-top: 10px; /* Adicionado para separar do cronômetro */
+        }
+        @media (max-width: 600px) {
+            .header-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .rating-options {
+                flex-direction: column;
+            }
+            .rating-options label {
+                width: 100%;
+                text-align: left;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -23,18 +188,21 @@
             <div class="section">
                 <h2>Informações Gerais</h2>
                 <div class="form-group">
-                    <label for="horaInicioPreenchimento">Hora de Início do Preenchimento:</label>
-                    <input type="time" id="horaInicioPreenchimento" name="horaInicioPreenchimento" readonly>
+                    <label for="nomeAvaliador">Nome do Avaliador:</label>
+                    <input type="text" id="nomeAvaliador" name="nomeAvaliador" required autocomplete="name">
                 </div>
                 <div class="form-group">
-                    <label for="horaConclusaoPreenchimento">Hora de Conclusão do Preenchimento:</label>
-                    <input type="time" id="horaConclusaoPreenchimento" name="horaConclusaoPreenchimento" readonly>
+                    <label for="nomeFormador">Nome do Formador (Avaliado):</label>
+                    <input type="text" id="nomeFormador" name="nomeFormador" required autocomplete="name">
                 </div>
-
+                <div class="form-group">
+                    <label for="turmaPeriodo">Turma/Período:</label>
+                    <input type="text" id="turmaPeriodo" name="turmaPeriodo" required autocomplete="organization">
+                </div>
                 <div class="form-group">
                     <label for="diretoriaPEC">Diretoria de Ensino do(a) PEC Multiplica:</label>
-                    <input type="text" id="diretoriaPEC" name="diretoriaPEC" list="diretorias" required>
-<datalist id="diretorias">
+                    <input type="text" id="diretoriaPEC" name="diretoriaPEC" list="diretorias" required autocomplete="on">
+        <datalist id="diretorias">
     <option value="Diretoria de Ensino Adamantina">
     <option value="Diretoria de Ensino Americana">
     <option value="Diretoria de Ensino Andradina">
@@ -2685,15 +2853,15 @@
                 </div>
             </div>
 
-            <div class="section">
-                <h2>Avaliação de Condução da Formação</h2>
-                <p>Para as perguntas abaixo, por favor, avalie em uma escala de 0 a 5, onde:</p>
+               <div class="section">
+                <h2>Pontuação dos Itens</h2>
+                <p>Atribua uma nota de 0 a 5 para cada item, sendo:</p>
                 <ul>
-                    <li><strong>0 = Não se classifica</strong></li>
-                    <li><strong>1 = Não se aplica / Não observado</strong></li>
-                    <li><strong>2 = Pouco Satisfatório</strong></li>
-                    <li><strong>3 = Satisfatório</strong></li>
-                    <li><strong>4 = Bom</strong></li>
+                    <li><strong>0 = Não se aplica / Não observado</strong></li>
+                    <li><strong>1 = Insatisfatório</strong></li>
+                    <li><strong>2 = Regular</strong></li>
+                    <li><strong>3 = Bom</strong></li>
+                    <li><strong>4 = Muito Bom</strong></li>
                     <li><strong>5 = Excelente</strong></li>
                 </ul>
                 <p>A nota final será calculada automaticamente com base nas suas respostas e nos pesos de cada item, com um máximo de 50 pontos.</p>
@@ -2705,11 +2873,11 @@
             <div class="section">
                 <div class="form-group">
                     <label for="combinadosProximoFeedback">Combinados para o próximo Feedback Formativo:</label>
-                    <textarea id="combinadosProximoFeedback" name="combinadosProximoFeedback" rows="3"></textarea>
+                    <textarea id="combinadosProximoFeedback" name="combinadosProximoFeedback" rows="3" autocomplete="off"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="observacoesNotas">Observações e notas:</label>
-                    <textarea id="observacoesNotas" name="observacoesNotas" rows="3"></textarea>
+                    <textarea id="observacoesNotas" name="observacoesNotas" rows="3" autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
