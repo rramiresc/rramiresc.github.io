@@ -180,3 +180,20 @@ ul {
 ul li {
     margin-bottom: 5px;
 }
+
+/* Estilo para o botão de zerar dados */
+#clearDataButton {
+    background-color: #dc3545; /* Vermelho */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-left: 10px; /* Espaçamento entre os botões de exportar e zerar */
+}
+
+#clearDataButton:hover {
+    background-color: #c82333; /* Vermelho mais escuro no hover */
+}

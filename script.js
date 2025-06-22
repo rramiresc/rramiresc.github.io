@@ -7,12 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const chronometerDisplay = document.getElementById('chronometer');
     const totalResponsesDisplay = document.getElementById('totalResponses');
     const exportCsvButton = document.getElementById('exportCsvButton');
+    const clearDataButton = document.getElementById('clearDataButton');
 
     const CSV_STORAGE_KEY = 'pecMultiplicaAvaliacoes';
-    const PASSWORD = 'Multiplica_2025-2'; // Senha para exportação CSV
+    const PASSWORD = 'Multiplica_2025-2';
 
-    let startTime; // Para o cronômetro
-    let chronometerInterval; // Para o intervalo do cronômetro
+    let startTime;
+    let chronometerInterval;
+    let hasInteracted = false; // Nova flag para controlar a primeira interação
 
     // Definição dos itens de avaliação com seus pesos
     const evaluationQuestions = [
@@ -61,12 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Inicializa o cronômetro e preenche a hora de início
-    function initializeFormTime() {
-        const now = new Date();
-        horaInicioPreenchimentoInput.value = formatTime(now);
-        startTime = now.getTime();
-        clearInterval(chronometerInterval); // Limpa qualquer intervalo anterior
-        chronometerInterval = setInterval(updateChronometer, 1000);
+    function startChronometer() {
+        if (!hasInteracted) { // Inicia apenas se não houver interação prévia
+            const now = new Date();
+            horaInicioPreenchimentoInput.value = formatTime(now);
+            startTime = now.getTime();
+            chronometerInterval = setInterval(updateChronometer, 1000);
+            hasInteracted = true; // Define a flag como verdadeira
+        }
+    }
+
+    // Para o cronômetro
+    function stopChronometer() {
+        clearInterval(chronometerInterval);
+        horaConclusaoPreenchimentoInput.value = formatTime(new Date());
     }
 
     // Carrega e exibe o total de respostas enviadas
@@ -76,31 +86,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Função para definir a cor e a imagem de fundo com base no horário
-function setBackgroundColorAndImageBasedOnTime() {
-    const now = new Date();
-    const hour = now.getHours(); // Pega a hora atual (0-23)
+    function setBackgroundColorAndImageBasedOnTime() {
+        const now = new Date();
+        const hour = now.getHours();
 
-    // Define "dia" como 6h da manhã até antes das 18h (6 PM).
-    const isDaytime = hour >= 6 && hour < 18;
+        const isDaytime = hour >= 6 && hour < 18;
+        const body = document.body;
 
-    const body = document.body;
+        if (isDaytime) {
+            body.style.backgroundColor = '#FFFFFF';
+            body.style.color = '#333333';
+            body.style.backgroundImage = 'url("pano de fundo multiplica - branco.jpeg")';
+        } else {
+            body.style.backgroundColor = '#2196F3';
+            body.style.color = '#FFFFFF';
+            body.style.backgroundImage = 'url("pano de fundo multiplica - azul.jpeg")';
+        }
 
-    if (isDaytime) {
-        body.style.backgroundColor = '#FFFFFF'; // Branco para o dia
-        body.style.color = '#333333'; // Cor do texto para contraste no dia
-        body.style.backgroundImage = 'url("pano de fundo multiplica - branco.jpeg")'; // Imagem para o dia
-    } else {
-        body.style.backgroundColor = '#2196F3'; // Um tom de azul para a noite
-        body.style.color = '#FFFFFF'; // Cor do texto para contraste na noite
-        body.style.backgroundImage = 'url("pano de fundo multiplica - azul.jpeg")'; // Imagem para a noite
+        body.style.backgroundSize = 'contain';
+        body.style.backgroundPosition = 'center center';
+        body.style.backgroundRepeat = 'no-repeat';
+        body.style.backgroundAttachment = 'fixed';
     }
-
-    // Propriedades comuns para ambas as imagens para evitar distorção e manter fixa
-    body.style.backgroundSize = 'contain'; // Alterado para 'contain'
-    body.style.backgroundPosition = 'center center';
-    body.style.backgroundRepeat = 'no-repeat';
-    body.style.backgroundAttachment = 'fixed';
-}
 
     // Função para criar os grupos de rádio para cada questão
     function createRatingGroup(question) {
@@ -134,7 +141,6 @@ function setBackgroundColorAndImageBasedOnTime() {
             }
         });
 
-        // Normaliza a nota para que o máximo seja 50
         let finalNormalizedScore = (currentWeightedScore / maxPossibleWeightedScore) * 50;
 
         notaFinalInput.value = finalNormalizedScore.toFixed(2);
@@ -147,26 +153,40 @@ function setBackgroundColorAndImageBasedOnTime() {
         evaluationItemsContainer.appendChild(createRatingGroup(question));
     });
 
-    // Inicializa o tempo, cronômetro, contador e background ao carregar a página
-    initializeFormTime();
+    // Inicializa contador e background ao carregar a página
     loadTotalResponses();
-    // Use a função consolidada para definir o background
-    setBackgroundColorAndImageBasedOnTime(); 
-    // Define o intervalo para a função consolidada
-    setInterval(setBackgroundColorAndImageBasedOnTime, 60 * 60 * 1000); 
+    setBackgroundColorAndImageBasedOnTime();
+    setInterval(setBackgroundColorAndImageBasedOnTime, 60 * 60 * 1000);
 
     // --- Event Listeners ---
 
-    // Calcula a nota final quando qualquer rádio é clicado ou alterado
-    evaluationItemsContainer.addEventListener('change', calculateFinalScore);
+    // Adiciona um listener ao formulário para detectar a primeira interação com inputs, selects e textareas
+    avaliacaoForm.addEventListener('change', (event) => {
+        const target = event.target;
+        // Verifica se o elemento alterado NÃO é um botão de submit, exportar ou limpar
+        if (target.tagName !== 'BUTTON' && target.type !== 'submit' && target.id !== 'exportCsvButton' && target.id !== 'clearDataButton') {
+            startChronometer(); // Inicia o cronômetro na primeira interação
+        }
+        // Se a mudança for em um item de avaliação, recalcula a nota
+        if (target.closest('.rating-group')) { // Verifica se o elemento está dentro de um grupo de avaliação
+            calculateFinalScore();
+        }
+    });
+
+    avaliacaoForm.addEventListener('input', (event) => {
+        const target = event.target;
+        // Verifica se o elemento alterado NÃO é um botão de submit, exportar ou limpar
+        if (target.tagName !== 'BUTTON' && target.type !== 'submit' && target.id !== 'exportCsvButton' && target.id !== 'clearDataButton') {
+            startChronometer(); // Inicia o cronômetro na primeira interação (para inputs de texto, data, etc.)
+        }
+    });
+
 
     // Lida com o envio do formulário
     avaliacaoForm.addEventListener('submit', (event) => {
-        event.preventDefault(); // Impede o envio padrão do formulário
+        event.preventDefault();
 
-        // Preenche a hora de conclusão do preenchimento
-        horaConclusaoPreenchimentoInput.value = formatTime(new Date());
-        clearInterval(chronometerInterval); // Para o cronômetro
+        stopChronometer(); // Para o cronômetro ao submeter
 
         const formData = new FormData(avaliacaoForm);
         const data = {};
@@ -174,25 +194,27 @@ function setBackgroundColorAndImageBasedOnTime() {
             data[key] = value;
         }
 
-        // Adiciona a nota final e o tempo de preenchimento aos dados
         data['notaFinal'] = notaFinalInput.value;
         data['tempoPreenchimento'] = chronometerDisplay.textContent;
 
-        // Salva os dados no localStorage
         saveToCsvStorage(data);
 
         console.log('Dados do formulário:', data);
         alert('Avaliação enviada com sucesso!');
 
-        // Reseta o formulário e reinicia o cronômetro/contador/background
+        // Reseta o formulário e o estado do cronômetro para um novo preenchimento
         avaliacaoForm.reset();
         notaFinalInput.value = '';
-        initializeFormTime(); // Reinicia o cronômetro e a hora de início
-        loadTotalResponses(); // Atualiza o contador de respostas
-        setBackgroundColorAndImageBasedOnTime(); // Atualiza o background novamente (caso a hora tenha mudado)
+        chronometerDisplay.textContent = '00:00:00'; // Zera o display do cronômetro
+        hasInteracted = false; // Reseta a flag
+        horaInicioPreenchimentoInput.value = ''; // Limpa a hora de início
+        horaConclusaoPreenchimentoInput.value = ''; // Limpa a hora de conclusão
+        loadTotalResponses();
+        setBackgroundColorAndImageBasedOnTime();
+        // Não chama startChronometer aqui, ele aguardará a próxima interação.
     });
 
-    // Lógica para salvar os dados no localStorage como um array de objetos
+    // Lógica para salvar os dados no localStorage
     function saveToCsvStorage(newData) {
         const storedData = JSON.parse(localStorage.getItem(CSV_STORAGE_KEY) || '[]');
         storedData.push(newData);
@@ -210,30 +232,25 @@ function setBackgroundColorAndImageBasedOnTime() {
                 return;
             }
 
-            // Pega todos os cabeçalhos possíveis de todos os objetos para garantir que todas as colunas sejam incluídas
             const allKeys = new Set();
             storedData.forEach(item => {
                 Object.keys(item).forEach(key => allKeys.add(key));
             });
             const headers = Array.from(allKeys);
 
-            // Cria o cabeçalho CSV
             let csvContent = headers.map(header => `"${header}"`).join(',') + '\n';
 
-            // Adiciona as linhas de dados
             storedData.forEach(row => {
                 const rowData = headers.map(header => {
                     const value = row[header] !== undefined ? row[header] : '';
-                    // Escapa aspas duplas e envolve o valor em aspas
                     return `"${String(value).replace(/"/g, '""')}"`;
                 });
                 csvContent += rowData.join(',') + '\n';
             });
 
-            // Cria um blob e um link para download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            if (link.download !== undefined) { // Feature detection
+            if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute('href', url);
                 link.setAttribute('download', 'avaliacoes_pec_multiplica.csv');
@@ -243,6 +260,22 @@ function setBackgroundColorAndImageBasedOnTime() {
                 document.body.removeChild(link);
             } else {
                 alert('Seu navegador não suporta download de arquivos diretamente. Por favor, copie o texto abaixo:\n\n' + csvContent);
+            }
+        } else {
+            alert('Senha incorreta!');
+        }
+    });
+
+    // Lógica para o botão de Zerar Dados Salvos
+    clearDataButton.addEventListener('click', () => {
+        const inputPassword = prompt('Por favor, digite a senha para zerar os dados:');
+        if (inputPassword === PASSWORD) {
+            const confirmClear = confirm('Tem certeza que deseja zerar TODOS os dados de formulários salvos? Esta ação é irreversível.');
+
+            if (confirmClear) {
+                localStorage.removeItem(CSV_STORAGE_KEY);
+                loadTotalResponses();
+                alert('Todos os dados de formulários foram zerados com sucesso!');
             }
         } else {
             alert('Senha incorreta!');
