@@ -2,19 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const avaliacaoForm = document.getElementById('avaliacaoForm');
     const evaluationItemsContainer = document.getElementById('evaluationItems');
     const notaFinalInput = document.getElementById('notaFinal');
-    const horaInicioPreenchimentoInput = document.getElementById('horaInicioPreenchimento');
-    const horaConclusaoPreenchimentoInput = document.getElementById('horaConclusaoPreenchimento');
     const chronometerDisplay = document.getElementById('chronometer');
     const totalResponsesDisplay = document.getElementById('totalResponses');
     const exportCsvButton = document.getElementById('exportCsvButton');
     const clearDataButton = document.getElementById('clearDataButton');
 
     const CSV_STORAGE_KEY = 'pecMultiplicaAvaliacoes';
-    const PASSWORD = 'Multiplica_2025-2';
+    const PASSWORD = 'Multiplica_2025-2'; // Senha para exportar/zerar
 
     let startTime;
+    let endTime; // Variável para armazenar o tempo de fim
     let chronometerInterval;
     let hasInteracted = false; // Nova flag para controlar a primeira interação
+    let inicioPreenchimento = ''; // Variável para armazenar a data e hora de início
+    let conclusaoPreenchimento = ''; // Variável para armazenar a data e hora de conclusão
 
     // Definição dos itens de avaliação com seus pesos
     const evaluationQuestions = [
@@ -43,223 +44,266 @@ document.addEventListener('DOMContentLoaded', () => {
         return sum + (question.weight * 5);
     }, 0);
 
-    // --- Funções de Utilitário ---
+    // Calcula a soma real dos pesos para definir o maxPossibleRawScore dinamicamente
+    const newSumOfWeights = evaluationQuestions.reduce((acc, q) => acc + q.weight, 0); 
+    const maxPossibleRawScore = newSumOfWeights * 5; // Usa a soma calculada * 5
+    // console.log("Soma total dos pesos (calculada):", newSumOfWeights); 
+    // console.log("Max Possible Raw Score (calculado):", maxPossibleRawScore); 
 
-    // Formata a hora atual
-    function formatTime(date) {
-        return date.toTimeString().slice(0, 5); // HH:MM
+    // Função para renderizar os itens de avaliação
+    function renderEvaluationItems() {
+        evaluationItemsContainer.innerHTML = ''; // Limpa o conteúdo existente
+        evaluationQuestions.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('evaluation-item');
+            itemDiv.setAttribute('data-question-id', item.id); // Adiciona o ID da pergunta para fácil acesso
+
+            itemDiv.innerHTML = `
+                <p>${item.text} <span class="weight-label">(Peso: ${item.weight})</span></p>
+                <div class="rating-options">
+                    <input type="radio" id="${item.id}-0" name="${item.id}" value="0" data-weight="${item.weight}" required>
+                    <label for="${item.id}-0">0</label>
+
+                    <input type="radio" id="${item.id}-1" name="${item.id}" value="1" data-weight="${item.weight}" required>
+                    <label for="${item.id}-1">1</label>
+
+                    <input type="radio" id="${item.id}-2" name="${item.id}" value="2" data-weight="${item.weight}" required>
+                    <label for="${item.id}-2">2</label>
+
+                    <input type="radio" id="${item.id}-3" name="${item.id}" value="3" data-weight="${item.weight}" required>
+                    <label for="${item.id}-3">3</label>
+
+                    <input type="radio" id="${item.id}-4" name="${item.id}" value="4" data-weight="${item.weight}" required>
+                    <label for="${item.id}-4">4</label>
+
+                    <input type="radio" id="${item.id}-5" name="${item.id}" value="5" data-weight="${item.weight}" required>
+                    <label for="${item.id}-5">5</label>
+                </div>
+            `;
+            evaluationItemsContainer.appendChild(itemDiv);
+        });
+
+        // Adiciona listeners para calcular a nota final quando as opções são selecionadas
+        evaluationItemsContainer.addEventListener('change', calculateFinalScore);
     }
 
-    // Atualiza o cronômetro
-    function updateChronometer() {
-        const now = new Date().getTime();
-        const elapsed = now - startTime;
-        const hours = Math.floor(elapsed / (1000 * 60 * 60));
-        const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+    // Função para calcular a nota final (normalizada para máximo de 50)
+    function calculateFinalScore() {
+        let totalScore = 0; // Soma bruta dos pontos x pesos
+        evaluationQuestions.forEach(item => {
+            const selectedOption = document.querySelector(`input[name="${item.id}"]:checked`);
+            if (selectedOption) {
+                const score = parseInt(selectedOption.value);
+                const weight = parseInt(selectedOption.dataset.weight);
+                totalScore += score * weight;
+            }
+        });
 
-        const format = (num) => String(num).padStart(2, '0');
-        chronometerDisplay.textContent = `${format(hours)}:${format(minutes)}:${format(seconds)}`;
+        const desiredMaxScore = 50; // O objetivo é que a nota final seja no máximo 50.
+
+        // Normaliza a nota: (nota_bruta / nota_max_bruta) * nota_max_desejada
+        let normalizedScore = (totalScore / maxPossibleRawScore) * desiredMaxScore;
+        
+        // --- INÍCIO DOS LOGS DE DEPURACÃO ---
+        console.log('--- Cálculo da Nota ---');
+        console.log('totalScore (soma bruta):', totalScore);
+        console.log('maxPossibleRawScore (máx bruto esperado - calculado):', maxPossibleRawScore);
+        console.log('normalizedScore (após normalização):', normalizedScore);
+        // --- FIM DOS LOGS DE DEPURACÃO ---
+
+        // Arredonda para duas casas decimais e garante que não ultrapasse 50
+        const finalRoundedScore = Math.min(Math.round(normalizedScore * 100) / 100, desiredMaxScore);
+        
+        // CORREÇÃO AQUI: Substituir o ponto por vírgula para exibir
+        notaFinalInput.value = finalRoundedScore.toFixed(2).replace('.', ',');
+
+        // --- MAIS LOGS DE DEPURACÃO ---
+        console.log('finalRoundedScore (após arredondamento e limite):', finalRoundedScore);
+        console.log('notaFinalInput.value (valor final exibido):', notaFinalInput.value);
+        console.log('-----------------------');
+        // --- FIM DOS LOGS DE DEPURACÃO ---
     }
 
-    // Inicializa o cronômetro e preenche a hora de início
+    // Inicializa o cronômetro
     function startChronometer() {
-        if (!hasInteracted) { // Inicia apenas se não houver interação prévia
+        if (!chronometerInterval) {
             const now = new Date();
-            horaInicioPreenchimentoInput.value = formatTime(now);
             startTime = now.getTime();
-            chronometerInterval = setInterval(updateChronometer, 1000);
-            hasInteracted = true; // Define a flag como verdadeira
+            inicioPreenchimento = `${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR')}`; // Captura data e hora de início
+
+            chronometerInterval = setInterval(() => {
+                const currentNow = new Date().getTime();
+                const diff = currentNow - startTime;
+                chronometerDisplay.textContent = formatTime(diff);
+            }, 1000);
         }
     }
 
     // Para o cronômetro
     function stopChronometer() {
-        clearInterval(chronometerInterval);
-        horaConclusaoPreenchimentoInput.value = formatTime(new Date());
+        if (chronometerInterval) {
+            clearInterval(chronometerInterval);
+            chronometerInterval = null;
+        }
     }
 
-    // Carrega e exibe o total de respostas enviadas
+    // Formata o tempo para H:M:S
+    function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const pad = (num) => num < 10 ? '0' + num : num;
+        return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    // Carrega o contador de respostas do localStorage
     function loadTotalResponses() {
-        const responses = JSON.parse(localStorage.getItem(CSV_STORAGE_KEY) || '[]');
-        totalResponsesDisplay.textContent = responses.length;
-    }
-
-    // Função para definir a cor e a imagem de fundo com base no horário
-    function setBackgroundColorAndImageBasedOnTime() {
-        const now = new Date();
-        const hour = now.getHours();
-
-        const isDaytime = hour >= 6 && hour < 18;
-        const body = document.body;
-
-        if (isDaytime) {
-            body.style.backgroundColor = '#FFFFFF';
-            body.style.color = '#333333';
-            body.style.backgroundImage = 'url("pano de fundo multiplica - branco.jpeg")';
+        const storedData = localStorage.getItem(CSV_STORAGE_KEY);
+        if (storedData) {
+            const dataArray = JSON.parse(storedData);
+            totalResponsesDisplay.textContent = dataArray.length;
         } else {
-            body.style.backgroundColor = '#2196F3';
-            body.style.color = '#FFFFFF';
-            body.style.backgroundImage = 'url("pano de fundo multiplica - azul.jpeg")';
+            totalResponsesDisplay.textContent = 0;
         }
-
-        body.style.backgroundSize = 'contain';
-        body.style.backgroundPosition = 'center center';
-        body.style.backgroundRepeat = 'no-repeat';
-        body.style.backgroundAttachment = 'fixed';
     }
 
-    // Função para criar os grupos de rádio para cada questão
-    function createRatingGroup(question) {
-        const div = document.createElement('div');
-        div.classList.add('rating-group');
-        div.innerHTML = `<p>${question.text}</p>`;
-
-        const optionsDiv = document.createElement('div');
-        optionsDiv.classList.add('rating-options');
-
-        for (let i = 0; i <= 5; i++) {
-            const label = document.createElement('label');
-            label.innerHTML = `
-                <input type="radio" name="${question.id}" value="${i}" required>
-                ${i}
-            `;
-            optionsDiv.appendChild(label);
+    // Adiciona listener para a primeira interação para iniciar o cronômetro
+    avaliacaoForm.addEventListener('change', () => {
+        if (!hasInteracted) {
+            startChronometer();
+            hasInteracted = true;
         }
-        div.appendChild(optionsDiv);
-        return div;
-    }
+    }, { once: true }); // Apenas uma vez
 
-    // Função para calcular a nota final
-    function calculateFinalScore() {
-        let currentWeightedScore = 0;
-        evaluationQuestions.forEach(question => {
-            const selectedOption = document.querySelector(`input[name="${question.id}"]:checked`);
-            if (selectedOption) {
-                const score = parseInt(selectedOption.value);
-                currentWeightedScore += score * question.weight;
-            }
+    // Lógica de envio do formulário
+    avaliacaoForm.addEventListener('submit', (event) => {
+        event.preventDefault(); // Impede o envio padrão do formulário
+
+        stopChronometer(); // Para o cronômetro ao enviar
+
+        let tempoPreenchimento = 'N/A';
+        const now = new Date(); // Captura a data e hora de conclusão no momento do envio
+        conclusaoPreenchimento = `${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR')}`;
+
+        if (startTime) {
+            endTime = now.getTime(); // Define endTime
+            tempoPreenchimento = endTime - startTime;
+        }
+
+        // Coleta os dados do formulário - CORRIGIDO OS IDs AQUI
+        const formData = {
+            dataEnvio: now.toLocaleDateString('pt-BR'), // Data de envio
+            dataHoraInicioPreenchimento: inicioPreenchimento, // Data e hora de início
+            dataHoraConclusaoPreenchimento: conclusaoPreenchimento, // Data e hora de conclusão
+            tempoPreenchimento: formatTime(tempoPreenchimento), // Tempo total de preenchimento
+            // IDs CORRIGIDOS PARA CORRESPONDER AO HTML
+            nomePecPcgeAvaliado: document.getElementById('nomePecPcgeAvaliado').value,
+            nomeFormadorAvaliador: document.getElementById('nomeFormadorAvaliador').value,
+            diretoriaEnsino: document.getElementById('diretoriaEnsino').value,
+            numeroEncontro: document.getElementById('numeroEncontro').value,
+            dataAvaliacao: document.getElementById('dataAvaliacao').value,
+        };
+
+        evaluationQuestions.forEach(item => {
+            const selectedOption = document.querySelector(`input[name="${item.id}"]:checked`);
+            formData[item.id] = selectedOption ? selectedOption.value : ''; // Adiciona a resposta de cada pergunta
         });
 
-        let finalNormalizedScore = (currentWeightedScore / maxPossibleWeightedScore) * 50;
+        formData.combinadosProximoFeedback = document.getElementById('combinadosProximoFeedback').value;
+        formData.observacoesNotas = document.getElementById('observacoesNotas').value;
+        // Salva a nota no formato original (com ponto) para consistência no armazenamento/exportação CSV
+        // A exibição no input já terá a vírgula.
+        formData.notaFinal = notaFinalInput.value.replace(',', '.'); // Converte de volta para ponto para salvar/exportar
 
-        notaFinalInput.value = finalNormalizedScore.toFixed(2);
-    }
+        // Salva os dados no localStorage
+        let savedData = localStorage.getItem(CSV_STORAGE_KEY);
+        let dataArray = savedData ? JSON.parse(savedData) : [];
+        dataArray.push(formData);
+        localStorage.setItem(CSV_STORAGE_KEY, JSON.stringify(dataArray));
 
-    // --- Inicialização ---
+        loadTotalResponses(); // Atualiza o contador de respostas
 
-    // Adiciona todas as questões de avaliação ao formulário
-    evaluationQuestions.forEach(question => {
-        evaluationItemsContainer.appendChild(createRatingGroup(question));
-    });
-
-    // Inicializa contador e background ao carregar a página
-    loadTotalResponses();
-    setBackgroundColorAndImageBasedOnTime();
-    setInterval(setBackgroundColorAndImageBasedOnTime, 60 * 60 * 1000);
-
-    // --- Event Listeners ---
-
-    // Adiciona um listener ao formulário para detectar a primeira interação com inputs, selects e textareas
-    avaliacaoForm.addEventListener('change', (event) => {
-        const target = event.target;
-        // Verifica se o elemento alterado NÃO é um botão de submit, exportar ou limpar
-        if (target.tagName !== 'BUTTON' && target.type !== 'submit' && target.id !== 'exportCsvButton' && target.id !== 'clearDataButton') {
-            startChronometer(); // Inicia o cronômetro na primeira interação
-        }
-        // Se a mudança for em um item de avaliação, recalcula a nota
-        if (target.closest('.rating-group')) { // Verifica se o elemento está dentro de um grupo de avaliação
-            calculateFinalScore();
-        }
-    });
-
-    avaliacaoForm.addEventListener('input', (event) => {
-        const target = event.target;
-        // Verifica se o elemento alterado NÃO é um botão de submit, exportar ou limpar
-        if (target.tagName !== 'BUTTON' && target.type !== 'submit' && target.id !== 'exportCsvButton' && target.id !== 'clearDataButton') {
-            startChronometer(); // Inicia o cronômetro na primeira interação (para inputs de texto, data, etc.)
-        }
-    });
-
-
-    // Lida com o envio do formulário
-    avaliacaoForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        stopChronometer(); // Para o cronômetro ao submeter
-
-        const formData = new FormData(avaliacaoForm);
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            data[key] = value;
-        }
-
-        data['notaFinal'] = notaFinalInput.value;
-        data['tempoPreenchimento'] = chronometerDisplay.textContent;
-
-        saveToCsvStorage(data);
-
-        console.log('Dados do formulário:', data);
         alert('Avaliação enviada com sucesso!');
-
-        // Reseta o formulário e o estado do cronômetro para um novo preenchimento
-        avaliacaoForm.reset();
-        notaFinalInput.value = '';
-        chronometerDisplay.textContent = '00:00:00'; // Zera o display do cronômetro
-        hasInteracted = false; // Reseta a flag
-        horaInicioPreenchimentoInput.value = ''; // Limpa a hora de início
-        horaConclusaoPreenchimentoInput.value = ''; // Limpa a hora de conclusão
-        loadTotalResponses();
-        setBackgroundColorAndImageBasedOnTime();
-        // Não chama startChronometer aqui, ele aguardará a próxima interação.
+        avaliacaoForm.reset(); // Limpa o formulário após o envio
+        notaFinalInput.value = ''; // Limpa a nota final
+        chronometerDisplay.textContent = '00:00:00'; // Reseta o cronômetro
+        startTime = null; // Reseta startTime
+        endTime = null; // Reseta endTime
+        hasInteracted = false; // Reseta a flag de interação
+        inicioPreenchimento = '';
+        conclusaoPreenchimento = '';
+        renderEvaluationItems(); // Renderiza os itens novamente para garantir que os rádios estejam desmarcados corretamente
     });
 
-    // Lógica para salvar os dados no localStorage
-    function saveToCsvStorage(newData) {
-        const storedData = JSON.parse(localStorage.getItem(CSV_STORAGE_KEY) || '[]');
-        storedData.push(newData);
-        localStorage.setItem(CSV_STORAGE_KEY, JSON.stringify(storedData));
-    }
-
-    // Lógica para exportar CSV
+    // Lógica para o botão de Exportar Dados (CSV)
     exportCsvButton.addEventListener('click', () => {
-        const inputPassword = prompt('Por favor, digite a senha para exportar:');
+        const inputPassword = prompt('Por favor, digite a senha para exportar os dados:');
         if (inputPassword === PASSWORD) {
-            const storedData = JSON.parse(localStorage.getItem(CSV_STORAGE_KEY) || '[]');
+            const savedData = localStorage.getItem(CSV_STORAGE_KEY);
+            if (savedData) {
+                const dataArray = JSON.parse(savedData);
 
-            if (storedData.length === 0) {
-                alert('Não há dados para exportar.');
-                return;
-            }
+                // Define as colunas do CSV
+                const headers = [
+                    'Data de Envio',
+                    'Data e Hora Inicio Preenchimento',
+                    'Data e Hora Conclusao Preenchimento',
+                    'Tempo de Preenchimento',
+                    'Nome do PEC/PCG Avaliado', // CORRIGIDO PARA CORRESPONDER AO DADO SALVO
+                    'Nome do Formador Avaliador', // CORRIGIDO PARA CORRESPONDER AO DADO SALVO
+                    'Diretoria de Ensino', // CORRIGIDO PARA CORRESPONDER AO DADO SALVO
+                    'Nº do Encontro Formativo Avaliado', // CORRIGIDO PARA CORRESPONDER AO DADO SALVO
+                    'Data da Avaliação', // CORRIGIDO PARA CORRESPONDER AO DADO SALVO
+                    ...evaluationQuestions.map(q => `Q${q.id.substring(1)} - ${q.text} (Peso ${q.weight})`), // Adicionado o texto da pergunta
+                    'Combinados para o próximo Feedback Formativo', // CORRIGIDO
+                    'Observações e notas', // CORRIGIDO
+                    'Nota Final'
+                ];
 
-            const allKeys = new Set();
-            storedData.forEach(item => {
-                Object.keys(item).forEach(key => allKeys.add(key));
-            });
-            const headers = Array.from(allKeys);
-
-            let csvContent = headers.map(header => `"${header}"`).join(',') + '\n';
-
-            storedData.forEach(row => {
-                const rowData = headers.map(header => {
-                    const value = row[header] !== undefined ? row[header] : '';
-                    return `"${String(value).replace(/"/g, '""')}"`;
+                const rows = dataArray.map(row => {
+                    const values = [
+                        row.dataEnvio,
+                        row.dataHoraInicioPreenchimento,
+                        row.dataHoraConclusaoPreenchimento,
+                        row.tempoPreenchimento,
+                        row.nomePecPcgeAvaliado, // CORRIGIDO
+                        row.nomeFormadorAvaliador, // CORRIGIDO
+                        row.diretoriaEnsino, // CORRIGIDO
+                        row.numeroEncontro, // CORRIGIDO
+                        row.dataAvaliacao, // CORRIGIDO
+                    ];
+                    evaluationQuestions.forEach(q => {
+                        values.push(row[q.id] || '');
+                    });
+                    values.push(
+                        row.combinadosProximoFeedback,
+                        row.observacoesNotas,
+                        row.notaFinal 
+                    );
+                    // Usamos vírgula como delimitador
+                    return values.map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
                 });
-                csvContent += rowData.join(',') + '\n';
-            });
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'avaliacoes_pec_multiplica.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // Usamos vírgula como delimitador
+                const csvContent = [headers.join(','), ...rows].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'avaliacoes_pec_multiplica.csv');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert('Seu navegador não suporta download de arquivos diretamente. Por favor, copie o texto abaixo:\n\n' + csvContent);
+                }
             } else {
-                alert('Seu navegador não suporta download de arquivos diretamente. Por favor, copie o texto abaixo:\n\n' + csvContent);
+                alert('Não há dados salvos para exportar.');
             }
         } else {
             alert('Senha incorreta!');
@@ -281,4 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Senha incorreta!');
         }
     });
+
+    // Inicialização
+    renderEvaluationItems();
+    loadTotalResponses();
 });

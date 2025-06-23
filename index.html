@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avaliação de Formação - PEC Multiplica</title>
+    <title>PROGRAMA MULTIPLICA SP - Avaliação de Formação - PEC Multiplica</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="fixed-top-bar">
+        <div class="floating-item-left">
+            Tempo de preenchimento: <span id="chronometer">00:00:00</span>
+        </div>
+        <div class="fixed-header-logo">
+            <img src="logo_completo.png" alt="Logo Programa Multiplica SP">
+        </div>
+        <div class="floating-item-right">
+            Nota Final: <input type="text" id="notaFinal" name="notaFinal" readonly>
+        </div>
+    </div>
+
+    <div class="floating-item-bottom">
+        Respostas enviadas: <span id="totalResponses">0</span>
+    </div>
+
     <div class="container">
         <div class="header-info">
-            <div class="timer-display">
-                Tempo de preenchimento: <span id="chronometer">00:00:00</span>
             </div>
-            <div class="response-count">
-                Respostas enviadas: <span id="totalResponses">0</span>
-            </div>
-        </div>
 
-        <h1>Formulário de Avaliação de Condução da Formação</h1>
+        <h1>
+            <p>PROGRAMA MULTIPLICA SP</p>
+            <p>Formulário de Avaliação de Condução da Formação</p>
+        </h1>
 
         <form id="avaliacaoForm">
             <div class="section">
                 <h2>Informações Gerais</h2>
-                <div class="form-group">
-                    <label for="horaInicioPreenchimento">Hora de Início do Preenchimento:</label>
-                    <input type="time" id="horaInicioPreenchimento" name="horaInicioPreenchimento" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="horaConclusaoPreenchimento">Hora de Conclusão do Preenchimento:</label>
-                    <input type="time" id="horaConclusaoPreenchimento" name="horaConclusaoPreenchimento" readonly>
-                </div>
+
 
                 <div class="form-group">
                     <label for="diretoriaPEC">Diretoria de Ensino do(a) PEC Multiplica:</label>
@@ -2594,7 +2600,7 @@
                     <input type="text" id="temaFormacao" name="temaFormacao" list="temasFormacao" required>
                     <datalist id="temasFormacao">
                         <option value="Alfabetização">
-"<option value=""Alunos desafiadores / Escolas com alta vulnerabilidade	"">"
+"<option value="Alunos desafiadores / Escolas com alta vulnerabilidade">"
 <option value="Anos Finais: Arte">
 <option value="Anos Finais: Ciências">
 <option value="Anos Finais: Educação Física">
@@ -2692,9 +2698,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="linkGravacao">Link da Gravação:</label>
-                    <input type="url" id="linkGravacao" name="linkGravacao" placeholder="https://exemplo.com/gravacao" required>
-                </div>
+    <label for="linkGravacao">Link da Gravação (Opcional):</label>
+    <input type="url" id="linkGravacao" name="linkGravacao" placeholder="Ex: https://meet.google.com/xyz">
+</div>
             </div>
 
             <div class="section">
@@ -2710,8 +2716,9 @@
                 </ul>
                 <p>A nota final será calculada automaticamente com base nas suas respostas e nos pesos de cada item, com um máximo de 50 pontos.</p>
 
+  
                 <div class="evaluation-items" id="evaluationItems">
-                    </div>
+                </div>
             </div>
 
             <div class="section">
@@ -2723,18 +2730,13 @@
                     <label for="observacoesNotas">Observações e notas:</label>
                     <textarea id="observacoesNotas" name="observacoesNotas" rows="3"></textarea>
                 </div>
-
-                <div class="form-group">
-                    <label for="notaFinal">Nota Final (0-50):</label>
-                    <input type="text" id="notaFinal" name="notaFinal" readonly>
-                </div>
             </div>
 
             <button type="submit">Enviar Avaliação</button>
         </form>
 
         <hr>
-                <div class="export-section">
+        <div class="export-section">
             <button id="exportCsvButton">Exportar Dados (CSV)</button>
             <button id="clearDataButton">Zerar Dados Salvos</button>
         </div>

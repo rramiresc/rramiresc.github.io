@@ -1,14 +1,15 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f8ff; /* Cor de fundo de fallback */
-    
+    background-image: url('pano de fundo multiplica - branco.jpeg'); /* Imagem para o dia */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-
     margin: 0;
-    padding: 20px;
+    /* Ajusta o padding-top para acomodar a nova barra superior fixa */
+    padding-top: 120px; /* Altura da barra superior + espaço extra */
+    padding-bottom: 20px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -22,116 +23,119 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     max-width: 800px;
     width: 100%;
+    position: relative;
+    z-index: 1; /* Garante que o conteúdo do formulário fique acima dos elementos flutuantes */
 }
 
+/* O header-info agora pode ser usado para outros elementos do cabeçalho do formulário, se houver */
 .header-info {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
     padding: 10px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.timer-display, .response-count {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #0056b3;
 }
 
 h1, h2 {
-    color: #333;
+    color: #0056b3;
     text-align: center;
     margin-bottom: 20px;
 }
+h1 p {
+    margin: 5px 0;
+}
 
 .section {
-    margin-bottom: 30px;
+    background-color: #f9f9f9;
     padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: rgba(249, 249, 249, 0.8);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
 }
 
 .form-group {
     margin-bottom: 15px;
 }
 
-label {
+.form-group label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #555;
+    color: #333;
 }
 
-input[type="text"],
-input[type="time"],
-input[type="url"],
-textarea,
-select {
+/* Regra UNIFICADA para todos os inputs de texto, data, hora, URL e textareas no formulário principal */
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group input[type="url"], /* <--- AGORA INCLUÍDO AQUI */
+.form-group textarea,
+.form-group select {
     width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    font-size: 1em;
     box-sizing: border-box;
-    font-size: 16px;
 }
 
-textarea {
-    resize: vertical;
-}
-
-input[readonly] {
-    background-color: #e9e9e9;
+/* Estilo específico para input readonly */
+.form-group input[type="text"][readonly],
+.form-group input[type="time"][readonly] {
+    background-color: #e9ecef;
     cursor: not-allowed;
 }
 
-.rating-group {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.9);
+.evaluation-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
 }
 
-.rating-group p {
+.evaluation-item p {
     margin-top: 0;
     margin-bottom: 10px;
     font-weight: bold;
-    color: #444;
+    color: #555;
+}
+
+.weight-label {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #777;
 }
 
 .rating-options {
     display: flex;
-    /* Altera para preencher o espaço disponível */
-    justify-content: space-between; /* Distribui o espaço igualmente entre os itens */
-    gap: 5px; /* Reduz o gap para dar mais espaço aos itens */
-    flex-wrap: wrap; /* Permite quebrar linha se não houver espaço suficiente */
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rating-options input[type="radio"] {
+    display: none;
 }
 
 .rating-options label {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centraliza o conteúdo verticalmente (número e rádio) */
-    justify-content: center; /* Centraliza o conteúdo horizontalmente */
-    flex-grow: 1; /* Permite que os itens cresçam para preencher o espaço */
-    flex-basis: 0; /* Define a base de 0 para que flex-grow funcione bem */
-    min-width: 40px; /* Largura mínima para evitar que fiquem muito pequenos */
-    cursor: pointer;
     background-color: #f0f0f0;
-    padding: 8px 0; /* Padding vertical, padding horizontal gerenciado por flex-grow */
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    transition: background-color 0.2s ease;
-    text-align: center; /* Garante que o texto (número) esteja centralizado */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    text-align: center;
+    flex-grow: 1;
+    min-width: 40px;
+}
+
+.rating-options input[type="radio"]:checked + label {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
 }
 
 .rating-options label:hover {
     background-color: #e0e0e0;
-}
-
-.rating-options input[type="radio"] {
-    margin-top: 5px;
-    transform: scale(1.2);
 }
 
 button[type="submit"] {
@@ -156,7 +160,7 @@ button[type="submit"]:hover {
     margin-top: 20px;
 }
 
-#exportCsvButton {
+#exportCsvButton, #clearDataButton {
     background-color: #007bff;
     color: white;
     padding: 10px 15px;
@@ -165,10 +169,20 @@ button[type="submit"]:hover {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
+    margin: 5px;
 }
 
 #exportCsvButton:hover {
     background-color: #0056b3;
+}
+
+#clearDataButton {
+    background-color: #dc3545;
+    margin-left: 10px;
+}
+
+#clearDataButton:hover {
+    background-color: #c82333;
 }
 
 ul {
@@ -181,19 +195,134 @@ ul li {
     margin-bottom: 5px;
 }
 
-/* Estilo para o botão de zerar dados */
-#clearDataButton {
-    background-color: #dc3545; /* Vermelho */
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-    margin-left: 10px; /* Espaçamento entre os botões de exportar e zerar */
+/* NOVO/CORRIGIDO: Estilos para a barra superior fixa (contém logo e outros itens fixos de cima) */
+.fixed-top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center; /* Centraliza o conteúdo (fixed-item-content) */
+    align-items: center;
+    padding: 10px 0; /* Padding vertical, padding horizontal definido no fixed-item-content */
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 
-#clearDataButton:hover {
-    background-color: #c82333; /* Vermelho mais escuro no hover */
+/* Container para os itens dentro da barra fixa, para controlar a largura máxima */
+.fixed-top-bar .fixed-item-content {
+    display: flex;
+    justify-content: space-between; /* Espaça os itens: tempo, logo, nota */
+    align-items: center;
+    width: 100%;
+    max-width: 800px; /* Mesma largura máxima do container do formulário */
+    padding: 0 20px; /* Padding horizontal para não colar nas bordas da tela */
+    box-sizing: border-box;
+}
+
+/* NOVO: Estilo para o container do logo dentro da barra superior fixa */
+.fixed-header-logo {
+    flex-grow: 1; /* Permite que o logo ocupe o espaço central disponível */
+    text-align: center; /* Centraliza a imagem do logo */
+}
+
+.fixed-header-logo img {
+    max-height: 80px; /* Altura máxima do logo, ajuste se necessário */
+    width: auto;
+    display: block;
+    margin: 0 auto; /* Centraliza a imagem */
+}
+
+/* CORRIGIDO: Ajustes para os itens flutuantes que AGORA estão dentro de .fixed-top-bar */
+.floating-item-left,
+.floating-item-right {
+    position: static; /* É essencial que não seja 'fixed' aqui, pois o pai já é fixed */
+    background-color: transparent;
+    color: #0056b3;
+    padding: 0;
+    box-shadow: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* O item inferior permanece fixo na sua posição, fora da barra superior */
+.floating-item-bottom {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: rgba(0, 50, 150, 0.9);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.floating-item-right input[type="text"],
+.floating-item-left input[type="text"],
+.floating-item-bottom input[type="text"] {
+    width: 80px; /* Largura padrão para inputs flutuantes (desktop) */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+}
+
+/* REMOVIDAS AS REGRAS ANTIGAS DE .floating-elements-wrapper */
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    body {
+        padding-top: 150px; /* Mais espaço no topo para a barra em telas pequenas */
+        padding-bottom: 70px; /* Espaço para o item inferior em telas pequenas */
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    .fixed-top-bar .fixed-item-content {
+        flex-direction: column; /* Empilha os itens verticalmente */
+        padding: 10px; /* Ajusta padding */
+        text-align: center; /* Centraliza conteúdo na barra */
+        gap: 10px; /* Espaço entre os itens empilhados */
+    }
+
+    .floating-item-left,
+    .floating-item-right {
+        width: 100%; /* Ocupa largura total da barra em mobile */
+        justify-content: center; /* Centraliza conteúdo */
+        padding: 5px 0; /* Ajusta padding interno */
+    }
+
+    .fixed-header-logo {
+        margin-bottom: 10px; /* Espaço entre o logo e os itens em mobile */
+    }
+
+    .floating-item-bottom {
+        left: 50%; /* Centraliza horizontalmente o item inferior */
+        transform: translateX(-50%); /* Ajuste fino para o centro */
+        width: calc(100% - 40px); /* Ocupa quase toda a largura, com 20px de margem em cada lado */
+        text-align: center;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 15px;
+    }
+
+    .floating-item-right input[type="text"],
+    .floating-item-left input[type="text"],
+    .floating-item-bottom input[type="text"] {
+        width: 60px; /* Ajusta largura dos inputs flutuantes em telas menores */
+    }
+    /* REMOVIDA A REGRA PROBLEMÁTICA QUE ESTILIZAVA OS .form-group inputs para 60px aqui */
 }
