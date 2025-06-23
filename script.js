@@ -2625,6 +2625,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pautasFormativas = Array.from({length: 14}, (_, i) => `Pauta ${i + 1}`);
 
+       // --> AQUI É ONDE VOCÊ DEVE ADICIONAR O NOVO ARRAY DE HORÁRIOS <--
+    const horariosFixos = [
+        "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+        "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+        "16:00", "16:30", "17:00", "17:30", "18:00", "18:30"
+    ];
+    // <-- FIM DO NOVO ARRAY DE HORÁRIOS -->
+
     function populateDatalist(id, data) {
         const datalist = document.getElementById(id);
         if (datalist) {
@@ -2644,6 +2652,9 @@ document.addEventListener('DOMContentLoaded', () => {
     populateDatalist('responsaveis-list', responsaveisAvaliacao);
     populateDatalist('dias-semana-list', diasSemana);
     populateDatalist('pautas-list', pautasFormativas);
+    // --> ADICIONE ESTA CHAMADA AQUI NO SEU script.js <--
+    populateDatalist('horarios-formacao-list', horariosFixos); // <--- ESTA É A LINHA QUE ESTÁ FALTANDO!
+    // <-- FIM DA ADIÇÃO DA CHAMADA -->
 
     function getSavedData() {
         try {
