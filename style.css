@@ -1,328 +1,270 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f8ff; /* Cor de fundo de fallback */
-    background-image: url('pano de fundo multiplica - branco.jpeg'); /* Imagem para o dia */
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     margin: 0;
-    /* Ajusta o padding-top para acomodar a nova barra superior fixa */
-    padding-top: 120px; /* Altura da barra superior + espaço extra */
-    padding-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+    padding: 0;
+    background-image: url('fundo-branco.jpeg'); /* Fundo para o dia */
+    background-size: cover;
+    background-attachment: fixed;
+    color: #333;
+    transition: background-image 0.5s ease-in-out;
 }
 
-.container {
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
+body.night-mode {
+    background-image: url('fundo-azul.jpeg'); /* Fundo para a noite */
+    color: #eee;
+}
+
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    position: relative;
-    z-index: 1; /* Garante que o conteúdo do formulário fique acima dos elementos flutuantes */
-}
-
-/* O header-info agora pode ser usado para outros elementos do cabeçalho do formulário, se houver */
-.header-info {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 10px 0;
-}
-
-h1, h2 {
-    color: #0056b3;
-    text-align: center;
-    margin-bottom: 20px;
-}
-h1 p {
-    margin: 5px 0;
-}
-
-.section {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #eee;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Regra UNIFICADA para todos os inputs de texto, data, hora, URL e textareas no formulário principal */
-.form-group input[type="text"],
-.form-group input[type="date"],
-.form-group input[type="time"],
-.form-group input[type="url"], /* <--- AGORA INCLUÍDO AQUI */
-.form-group textarea,
-.form-group select {
-    width: calc(100% - 22px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
+    align-items: center;
+    padding: 15px 20px; /* Voltou ao padding anterior */
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
     box-sizing: border-box;
 }
 
-/* Estilo específico para input readonly */
-.form-group input[type="text"][readonly],
-.form-group input[type="time"][readonly] {
-    background-color: #e9ecef;
-    cursor: not-allowed;
+body.night-mode .fixed-header {
+    background-color: rgba(50, 50, 50, 0.9);
+    color: #eee;
 }
 
-.evaluation-item {
-    background-color: #fff;
+.header-left, .header-right {
+    font-size: 1.3em;
+    font-weight: bold;
+    white-space: nowrap;
+    min-width: 100px;
+    text-align: right;
+}
+
+.header-left {
+    text-align: left;
+}
+
+.header-center {
+    flex-grow: 1;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.header-center .logo {
+    max-height: 90px; /* Mantido o max-height da logo para que ela ocupe o espaço disponível */
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.fixed-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+body.night-mode .fixed-footer {
+    background-color: rgba(50, 50, 50, 0.9);
+    color: #eee;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 100px auto 70px auto; /* Voltou à margem superior anterior */
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+body.night-mode .form-container {
+    background-color: rgba(70, 70, 70, 0.95);
+    color: #eee;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+body.night-mode h1, body.night-mode h2 {
+    color: #aaddff;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+input[type="text"],
+input[type="time"],
+input[type="url"],
+textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+body.night-mode input[type="text"],
+body.night-mode input[type="time"],
+body.night-mode input[type="url"],
+body.night-mode textarea {
+    background-color: #555;
+    border-color: #777;
+    color: #eee;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.question-group {
+    background-color: #f4f4f4;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 6px;
     padding: 15px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
-.evaluation-item p {
+body.night-mode .question-group {
+    background-color: #444;
+    border-color: #666;
+}
+
+.question-group p {
     margin-top: 0;
     margin-bottom: 10px;
     font-weight: bold;
-    color: #555;
-}
-
-.weight-label {
-    font-weight: normal;
-    font-size: 0.9em;
-    color: #777;
 }
 
 .rating-options {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     flex-wrap: wrap;
 }
 
-.rating-options input[type="radio"] {
-    display: none;
-}
-
 .rating-options label {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 8px 15px;
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    font-weight: normal;
+    margin-top: 0;
+}
+
+.rating-options input[type="radio"] {
+    margin-right: 5px;
+    accent-color: #28a745;
+}
+
+.form-actions {
     text-align: center;
-    flex-grow: 1;
-    min-width: 40px;
+    margin-top: 30px;
 }
 
-.rating-options input[type="radio"]:checked + label {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
-
-.rating-options label:hover {
-    background-color: #e0e0e0;
-}
-
-button[type="submit"] {
-    background-color: #28a745;
-    color: white;
-    padding: 12px 20px;
+.submit-button,
+.export-button,
+.clear-button {
+    padding: 12px 25px;
     border: none;
     border-radius: 5px;
+    color: white;
+    font-size: 1.1em;
     cursor: pointer;
-    font-size: 18px;
-    width: 100%;
-    margin-top: 20px;
+    margin: 0 10px;
     transition: background-color 0.3s ease;
 }
 
-button[type="submit"]:hover {
+.submit-button {
+    background-color: #28a745;
+}
+
+.submit-button:hover {
     background-color: #218838;
 }
 
-.export-section {
-    text-align: center;
-    margin-top: 20px;
-}
-
-#exportCsvButton, #clearDataButton {
+.export-button {
     background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-    margin: 5px;
 }
 
-#exportCsvButton:hover {
+.export-button:hover {
     background-color: #0056b3;
 }
 
-#clearDataButton {
+.clear-button {
     background-color: #dc3545;
-    margin-left: 10px;
 }
 
-#clearDataButton:hover {
+.clear-button:hover {
     background-color: #c82333;
 }
 
-ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    margin-bottom: 15px;
-}
-
-ul li {
-    margin-bottom: 5px;
-}
-
-/* NOVO/CORRIGIDO: Estilos para a barra superior fixa (contém logo e outros itens fixos de cima) */
-.fixed-top-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center; /* Centraliza o conteúdo (fixed-item-content) */
-    align-items: center;
-    padding: 10px 0; /* Padding vertical, padding horizontal definido no fixed-item-content */
-    background-color: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-/* Container para os itens dentro da barra fixa, para controlar a largura máxima */
-.fixed-top-bar .fixed-item-content {
-    display: flex;
-    justify-content: space-between; /* Espaça os itens: tempo, logo, nota */
-    align-items: center;
-    width: 100%;
-    max-width: 800px; /* Mesma largura máxima do container do formulário */
-    padding: 0 20px; /* Padding horizontal para não colar nas bordas da tela */
-    box-sizing: border-box;
-}
-
-/* NOVO: Estilo para o container do logo dentro da barra superior fixa */
-.fixed-header-logo {
-    flex-grow: 1; /* Permite que o logo ocupe o espaço central disponível */
-    text-align: center; /* Centraliza a imagem do logo */
-}
-
-.fixed-header-logo img {
-    max-height: 80px; /* Altura máxima do logo, ajuste se necessário */
-    width: auto;
-    display: block;
-    margin: 0 auto; /* Centraliza a imagem */
-}
-
-/* CORRIGIDO: Ajustes para os itens flutuantes que AGORA estão dentro de .fixed-top-bar */
-.floating-item-left,
-.floating-item-right {
-    position: static; /* É essencial que não seja 'fixed' aqui, pois o pai já é fixed */
-    background-color: transparent;
-    color: #0056b3;
-    padding: 0;
-    box-shadow: none;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* O item inferior permanece fixo na sua posição, fora da barra superior */
-.floating-item-bottom {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background-color: rgba(0, 50, 150, 0.9);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    font-weight: bold;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.floating-item-right input[type="text"],
-.floating-item-left input[type="text"],
-.floating-item-bottom input[type="text"] {
-    width: 80px; /* Largura padrão para inputs flutuantes (desktop) */
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-align: center;
-    font-weight: bold;
-    background-color: rgba(255, 255, 255, 0.95);
-    color: #333;
-}
-
-/* REMOVIDAS AS REGRAS ANTIGAS DE .floating-elements-wrapper */
-
-/* Responsividade para telas menores */
+/* Responsividade */
 @media (max-width: 768px) {
-    body {
-        padding-top: 150px; /* Mais espaço no topo para a barra em telas pequenas */
-        padding-bottom: 70px; /* Espaço para o item inferior em telas pequenas */
+    .form-container {
+        margin: 80px 10px 50px 10px; /* Mantido o ajuste para cabeçalho em telas menores */
+        padding: 20px;
     }
-
-    .container {
-        padding: 15px;
+    .form-actions button {
+        display: block;
+        width: 90%;
+        margin: 10px auto;
     }
-
-    .fixed-top-bar .fixed-item-content {
-        flex-direction: column; /* Empilha os itens verticalmente */
-        padding: 10px; /* Ajusta padding */
-        text-align: center; /* Centraliza conteúdo na barra */
-        gap: 10px; /* Espaço entre os itens empilhados */
+    .fixed-header {
+        padding: 10px 15px; /* Reduz padding para telas menores, como antes */
     }
-
-    .floating-item-left,
-    .floating-item-right {
-        width: 100%; /* Ocupa largura total da barra em mobile */
-        justify-content: center; /* Centraliza conteúdo */
-        padding: 5px 0; /* Ajusta padding interno */
+    .header-center .logo {
+        max-height: 60px; /* Reduz a altura da logo em telas menores, como antes */
     }
-
-    .fixed-header-logo {
-        margin-bottom: 10px; /* Espaço entre o logo e os itens em mobile */
+    .header-left, .header-right {
+        font-size: 1em;
+        min-width: unset;
     }
-
-    .floating-item-bottom {
-        left: 50%; /* Centraliza horizontalmente o item inferior */
-        transform: translateX(-50%); /* Ajuste fino para o centro */
-        width: calc(100% - 40px); /* Ocupa quase toda a largura, com 20px de margem em cada lado */
-        text-align: center;
-        flex-direction: row;
+}
+@media (max-width: 480px) {
+    .fixed-header {
+        flex-wrap: wrap;
         justify-content: center;
-        padding: 10px 15px;
+        padding: 10px;
     }
+    .header-left, .header-right, .header-center {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    .header-center .logo {
+        max-height: 50px; /* Ajustado para telas muito pequenas, como antes */
+    }
+}
 
-    .floating-item-right input[type="text"],
-    .floating-item-left input[type="text"],
-    .floating-item-bottom input[type="text"] {
-        width: 60px; /* Ajusta largura dos inputs flutuantes em telas menores */
-    }
-    /* REMOVIDA A REGRA PROBLEMÁTICA QUE ESTILIZAVA OS .form-group inputs para 60px aqui */
+/* Estilo para autocomplete */
+datalist {
+    font-size: 0.9em;
+}
+
+/* Estilo para campos de validação com erro */
+input.error, textarea.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.error-group {
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
